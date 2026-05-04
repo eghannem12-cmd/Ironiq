@@ -392,6 +392,7 @@ async function init() {
 }
 
 function onLoggedIn() {
+  if (currentUser.email === 'eghannem12@gmail.com') { isPro = true; }
   document.getElementById('authScreen').style.display = 'none';
   const email = currentUser.email;
   const initials = email.substring(0, 2).toUpperCase();
