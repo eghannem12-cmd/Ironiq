@@ -165,6 +165,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <input class="auth-inp" type="password" id="authPass" placeholder="Password">
     <button class="auth-btn" onclick="doAuth()">Continue</button>
     <div style="display:flex;align-items:center;gap:10px;margin:14px 0"><div style="flex:1;height:1px;background:var(--bdr)"></div><span style="font-size:11px;color:var(--muted)">or</span><div style="flex:1;height:1px;background:var(--bdr)"></div></div>
+    <button onclick="signInDiscord()" style="width:100%;padding:10px;border:1px solid var(--bdr);border-radius:10px;background:var(--surf);color:var(--txt);font-family:Inter,sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s;margin-bottom:8px" onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor='var(--bdr)'"><svg width="16" height="16" viewBox="0 0 71 55" fill="none"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.6a40 40 0 0 0-1.8 3.7 54 54 0 0 0-16.3 0A38 38 0 0 0 25.6.6 58.4 58.4 0 0 0 11 4.9C1.6 19.1-1 33 .3 46.7a58.9 58.9 0 0 0 18 9.1 44 44 0 0 0 3.8-6.2 38.3 38.3 0 0 1-6-2.9l1.5-1.1a42 42 0 0 0 36 0l1.5 1.1a38.4 38.4 0 0 1-6 2.9 44 44 0 0 0 3.8 6.2 58.7 58.7 0 0 0 18-9.1C72 31 68.4 17.2 60.1 4.9ZM23.7 38.4c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.5 0 6.4 3.2 6.3 7.2 0 4-2.8 7.2-6.3 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.5 0 6.3 3.2 6.3 7.2 0 4-2.8 7.2-6.3 7.2Z" fill="#5865F2"/></svg>Continue with Discord</button>
     <button onclick="signInGoogle()" style="width:100%;padding:10px;border:1px solid var(--bdr);border-radius:10px;background:var(--surf);color:var(--txt);font-family:Inter,sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s" onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor='var(--bdr)'"><svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
     <div class="auth-err" id="authErr"></div>
   </div>
@@ -543,6 +544,12 @@ function scan(){if(scanned&&!isPro){showModal();return;}document.getElementById(
 function logMeal(){document.getElementById('loggedRow').style.display='flex';const b=document.getElementById('logBtn');b.textContent='Logged ✓';b.disabled=true;b.style.color='var(--green)';b.style.borderColor='var(--green)';}
 
 cfg(); rTimer(); init();
+async function signInDiscord(){
+  await sb.auth.signInWithOAuth({
+    provider: "discord",
+    options: { redirectTo: window.location.origin }
+  });
+}
 async function signInGoogle(){
   await sb.auth.signInWithOAuth({
     provider: "google",
