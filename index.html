@@ -526,7 +526,17 @@ function go(t){document.querySelectorAll('.tab').forEach((el,i)=>el.classList.to
 function showModal(){document.getElementById('upgradeModal').classList.add('show');}
 function closeModal(){document.getElementById('upgradeModal').classList.remove('show');}
 function selPlan(p){document.getElementById('planMonth').classList.toggle('sel-plan',p==='month');document.getElementById('planYear').classList.toggle('sel-plan',p==='year');}
-function goPro(){isPro=true;closeModal();const tp=document.getElementById('tierPill');tp.textContent='Pro ✦';tp.style.background='linear-gradient(90deg,#7c3aed,#a855f7)';tp.style.color='#fff';tp.style.border='none';['adTimer','adNote','adFood','adTheme','timerProLock'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});document.querySelectorAll('.lock-banner').forEach(el=>el.style.display='none');document.querySelectorAll('.lock-over-badge').forEach(el=>el.style.display='none');document.querySelectorAll('.cust-locked').forEach(el=>el.classList.remove('cust-locked'));renderNoteList();}
+function applyPro(){
+  const tp=document.getElementById('tierPill');
+  if(!tp)return;
+  tp.textContent='Pro ✦';tp.style.background='linear-gradient(90deg,#7c3aed,#a855f7)';tp.style.color='#fff';tp.style.border='none';
+  ['adTimer','adNote','adFood','adTheme','timerProLock'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  document.querySelectorAll('.lock-banner').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.lock-over-badge').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.cust-locked').forEach(el=>el.classList.remove('cust-locked'));
+  if(typeof renderNoteList==='function')renderNoteList();
+}
+function goPro(){isPro=true;closeModal();applyPro();const tp=document.getElementById('tierPill');tp.textContent='Pro ✦';tp.style.background='linear-gradient(90deg,#7c3aed,#a855f7)';tp.style.color='#fff';tp.style.border='none';['adTimer','adNote','adFood','adTheme','timerProLock'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});document.querySelectorAll('.lock-banner').forEach(el=>el.style.display='none');document.querySelectorAll('.lock-over-badge').forEach(el=>el.style.display='none');document.querySelectorAll('.cust-locked').forEach(el=>el.classList.remove('cust-locked'));renderNoteList();}
 function setTheme(t){if(t==='volt'){document.documentElement.style.setProperty('--acc','#c8ff00');document.documentElement.style.setProperty('--acc-t','#0a0a00');document.getElementById('th-volt').textContent='Volt ✓';document.getElementById('th-night').textContent='Night';}else{document.documentElement.style.setProperty('--acc','#a78bfa');document.documentElement.style.setProperty('--acc-t','#0d0010');document.getElementById('th-night').textContent='Night ✓';document.getElementById('th-volt').textContent='Volt';}}
 
 // TIMER
