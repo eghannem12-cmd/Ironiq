@@ -9,14 +9,15 @@
 <meta name="apple-mobile-web-app-title" content="IronIQ">
 <meta name="description" content="Your all-in-one gym companion — interval timer, workout log, and AI food tracker.">
 <link rel="manifest" href="/manifest.json">
-  <title>IronIQ</title>
+<title>IronIQ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#08080f;--surf:#0f0f1a;--card:#161622;--card2:#1c1c2e;--acc:#c8ff00;--acc-t:#0a0a00;--txt:#eeeef5;--muted:#6b6b88;--bdr:#22223a;--red:#ff4060;--green:#22c55e;--purple:#7c3aed;--orange:#f97316}
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-.nav{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.4rem;border-bottom:1px solid var(--bdr);background:rgba(8,8,15,.97);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.4rem;border-bottom:1px solid var(--bdr);background:rgba(8,8,15,.97);position:sticky;top:0;z-index:100;backdrop-filter:blur(8px)}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--acc)}
 .logo span{color:#ffffff33}
 .tabs{display:flex;gap:2px;background:var(--surf);border-radius:12px;padding:3px;border:1px solid var(--bdr)}
@@ -24,7 +25,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Inter',
 .tab.active{background:var(--acc);color:var(--acc-t);font-weight:600}
 .tab:hover:not(.active){color:var(--txt)}
 .user-area{display:flex;align-items:center;gap:8px}
-.ava{width:26px;height:26px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--acc-t)}
+.ava{width:26px;height:26px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--acc-t);cursor:pointer}
 .tier-pill{font-size:11px;color:var(--muted);background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:3px 10px;cursor:pointer;transition:all .15s}
 .tier-pill:hover{border-color:var(--acc);color:var(--acc)}
 .panel{display:none;padding:1.4rem;animation:up .22s ease}
@@ -124,6 +125,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .cust-locked{opacity:.45;pointer-events:none}
 .lock-over{position:relative}
 .lock-over-badge{position:absolute;top:10px;right:10px;background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;z-index:10}
+
+/* AUTH SCREEN */
+.auth-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:300;display:flex;align-items:center;justify-content:center}
+.auth-box{background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:2rem;max-width:340px;width:90%;text-align:center}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;color:var(--acc);margin-bottom:.2rem}
+.auth-tagline{font-size:13px;color:var(--muted);margin-bottom:1.5rem}
+.auth-tabs{display:flex;gap:2px;background:var(--surf);border-radius:10px;padding:3px;margin-bottom:1.2rem}
+.auth-tab{flex:1;padding:7px;border:none;background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;border-radius:7px;cursor:pointer;transition:all .18s}
+.auth-tab.active{background:var(--acc);color:var(--acc-t);font-weight:600}
+.auth-inp{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:'Inter',sans-serif;font-size:13px;padding:10px 14px;width:100%;margin-bottom:10px;transition:border .15s}
+.auth-inp:focus{outline:none;border-color:var(--acc)}
+.auth-btn{background:var(--acc);color:var(--acc-t);font-weight:700;font-size:14px;padding:11px 0;border:none;border-radius:10px;cursor:pointer;width:100%;font-family:'Inter',sans-serif;transition:all .15s;margin-top:4px}
+.auth-btn:hover{opacity:.9}
+.auth-err{font-size:12px;color:var(--red);margin-top:8px;min-height:18px}
+.auth-loading{font-size:13px;color:var(--muted);margin-top:8px}
+
 @media(max-width:600px){
   .g2{grid-template-columns:1fr}
   .g3{grid-template-columns:1fr 1fr}
@@ -135,6 +152,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </head>
 <body>
 
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">IRON<span style="color:#ffffff33">IQ</span></div>
+    <div class="auth-tagline">Your all-in-one gym companion</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="loginTab" onclick="switchAuth('login')">Log in</button>
+      <button class="auth-tab" id="signupTab" onclick="switchAuth('signup')">Sign up</button>
+    </div>
+    <input class="auth-inp" type="email" id="authEmail" placeholder="Email address">
+    <input class="auth-inp" type="password" id="authPass" placeholder="Password">
+    <button class="auth-btn" onclick="doAuth()">Continue</button>
+    <div class="auth-err" id="authErr"></div>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
 <div class="modal-bg" id="upgradeModal">
   <div class="modal">
     <div class="modal-logo">IRON<span style="color:#ffffff33">IQ</span></div>
@@ -176,7 +210,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
   <div class="user-area">
     <div id="tierPill" class="tier-pill" onclick="showModal()">Free</div>
-    <div class="ava">AK</div>
+    <div class="ava" id="userAva" onclick="signOut()" title="Sign out">?</div>
   </div>
 </div>
 
@@ -215,19 +249,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <div class="panel" id="panel-notebook">
   <div id="adNote" class="ad-banner"><span class="ad-txt">Advertisement — upgrade to remove</span><span class="ad-label">AD</span></div>
   <div class="heading">WORKOUT LOG</div>
-  <div class="sub">Track sessions &amp; PRs</div>
+  <div class="sub">Track sessions &amp; PRs — synced to your account</div>
   <div class="g2" style="align-items:start;gap:12px">
     <div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="font-size:12px;color:var(--muted)" id="entryCount">3 / 5 entries (free)</span>
+        <span style="font-size:12px;color:var(--muted)" id="entryCount">Loading...</span>
         <button class="btn-new" onclick="newNote()">+ New</button>
       </div>
-      <div id="noteList">
-        <div class="note-card sel" onclick="selN(0)"><div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:500;color:var(--txt)">Chest &amp; Triceps</span><span style="font-size:11px;color:var(--muted)">Today</span></div><div style="font-size:12px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Bench 4x8 @ 80kg...</div><span class="tag" style="background:#1e1e06;color:var(--acc)">Push</span></div>
-        <div class="note-card" onclick="selN(1)"><div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:500;color:var(--txt)">Back Day</span><span style="font-size:11px;color:var(--muted)">Mon</span></div><div style="font-size:12px;color:var(--muted);margin-top:3px">Deadlift 5x5 @ 120kg — PR!</div><span class="tag" style="background:#061a12;color:#22c55e">Pull</span></div>
-        <div class="note-card" onclick="selN(2)"><div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:500;color:var(--txt)">Leg Day</span><span style="font-size:11px;color:var(--muted)">Sat</span></div><div style="font-size:12px;color:var(--muted);margin-top:3px">Squats 4x6 @ 100kg...</div><span class="tag" style="background:#1a0c06;color:#f97316">Legs</span></div>
-      </div>
-      <div class="lock-banner">
+      <div id="noteList"></div>
+      <div class="lock-banner" id="noteLock">
         <div class="lock-icon">🔒</div>
         <div class="lock-title">Unlimited entries — Pro only</div>
         <div class="lock-sub">Free plan: 5 entries max</div>
@@ -235,20 +265,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
     </div>
     <div>
-      <div class="card">
-        <input class="inp" id="nT" value="Chest &amp; Triceps" style="margin-bottom:10px;font-size:15px;font-weight:500">
-        <textarea class="inp" id="nB">Bench Press: 4x8 @ 80kg ✓
-Incline DB: 3x10 @ 30kg ✓
-Cable Flyes: 3x12
-Tricep Pushdown: 4x15
-
-Notes: Up bench to 82.5kg next week.</textarea>
+      <div class="card" id="noteEditor" style="display:none">
+        <input class="inp" id="nT" placeholder="Session title" style="margin-bottom:10px;font-size:15px;font-weight:500">
+        <textarea class="inp" id="nB" placeholder="Log your exercises, sets, reps, notes..."></textarea>
         <div style="display:flex;gap:8px;margin-top:10px">
           <button class="btn-save" id="saveBtn" onclick="saveNote()">Save</button>
           <button class="btn-del" onclick="delNote()">Delete</button>
         </div>
-        <div class="sync-row"><span class="sync-dot"></span>Synced 2 min ago</div>
+        <div class="sync-row" id="syncRow"><span class="sync-dot"></span>Synced to cloud</div>
       </div>
+      <div id="noNoteSelected" style="text-align:center;color:var(--muted);font-size:13px;padding:2rem">Select or create an entry</div>
     </div>
   </div>
 </div>
@@ -345,13 +371,161 @@ Notes: Up bench to 82.5kg next week.</textarea>
 </div>
 
 <script>
-let isPro=false;
+// SUPABASE SETUP
+const SUPABASE_URL = 'https://vzxvyhitcxbkgccdqgoe.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_bHU0_VUzdqxvDHfKMmReZA_zpHRAr5e';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let isPro = false;
+let notes = [];
+let activeN = null;
+let authMode = 'login';
+
+// CHECK SESSION ON LOAD
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    onLoggedIn();
+  }
+}
+
+function onLoggedIn() {
+  document.getElementById('authScreen').style.display = 'none';
+  const email = currentUser.email;
+  const initials = email.substring(0, 2).toUpperCase();
+  document.getElementById('userAva').textContent = initials;
+  loadNotes();
+}
+
+// AUTH
+function switchAuth(mode) {
+  authMode = mode;
+  document.getElementById('loginTab').classList.toggle('active', mode === 'login');
+  document.getElementById('signupTab').classList.toggle('active', mode === 'signup');
+  document.getElementById('authErr').textContent = '';
+}
+
+async function doAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPass').value;
+  const errEl = document.getElementById('authErr');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'Please enter email and password'; return; }
+  const btn = document.querySelector('.auth-btn');
+  btn.textContent = 'Please wait...';
+  btn.disabled = true;
+  try {
+    let result;
+    if (authMode === 'login') {
+      result = await sb.auth.signInWithPassword({ email, password: pass });
+    } else {
+      result = await sb.auth.signUp({ email, password: pass });
+    }
+    if (result.error) {
+      errEl.textContent = result.error.message;
+    } else {
+      currentUser = result.data.user;
+      if (authMode === 'signup') {
+        errEl.style.color = 'var(--green)';
+        errEl.textContent = 'Account created! Check your email to confirm.';
+      } else {
+        onLoggedIn();
+      }
+    }
+  } catch(e) {
+    errEl.textContent = 'Something went wrong. Try again.';
+  }
+  btn.textContent = 'Continue';
+  btn.disabled = false;
+}
+
+async function signOut() {
+  if (!confirm('Sign out?')) return;
+  await sb.auth.signOut();
+  currentUser = null;
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('userAva').textContent = '?';
+}
+
+// NOTES - REAL CLOUD SYNC
+async function loadNotes() {
+  if (!currentUser) return;
+  const { data, error } = await sb.from('notes').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  if (error) { console.error(error); return; }
+  notes = data || [];
+  renderNoteList();
+}
+
+function renderNoteList() {
+  const list = document.getElementById('noteList');
+  list.innerHTML = '';
+  const isFree = !isPro;
+  document.getElementById('entryCount').textContent = isPro ? `${notes.length} entries` : `${notes.length} / 5 entries (free)`;
+  document.getElementById('noteLock').style.display = isFree ? 'block' : 'none';
+  if (notes.length === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:.5rem 0">No entries yet — create your first!</div>';
+    return;
+  }
+  notes.forEach((n, i) => {
+    const d = document.createElement('div');
+    d.className = 'note-card' + (activeN === n.id ? ' sel' : '');
+    d.onclick = () => selectNote(n);
+    const date = new Date(n.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short'});
+    d.innerHTML = `<div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:500;color:var(--txt)">${n.title||'Untitled'}</span><span style="font-size:11px;color:var(--muted)">${date}</span></div><div style="font-size:12px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(n.body||'').split('\n')[0]||'No content'}</div>`;
+    list.appendChild(d);
+  });
+}
+
+function selectNote(n) {
+  activeN = n.id;
+  document.getElementById('nT').value = n.title || '';
+  document.getElementById('nB').value = n.body || '';
+  document.getElementById('noteEditor').style.display = 'block';
+  document.getElementById('noNoteSelected').style.display = 'none';
+  renderNoteList();
+}
+
+async function newNote() {
+  if (!isPro && notes.length >= 5) { showModal(); return; }
+  const { data, error } = await sb.from('notes').insert({ user_id: currentUser.id, title: 'New session', body: '' }).select().single();
+  if (error) { alert('Error creating note'); return; }
+  notes.unshift(data);
+  selectNote(data);
+  renderNoteList();
+}
+
+async function saveNote() {
+  if (activeN === null) return;
+  const title = document.getElementById('nT').value;
+  const body = document.getElementById('nB').value;
+  const { error } = await sb.from('notes').update({ title, body }).eq('id', activeN);
+  const btn = document.getElementById('saveBtn');
+  if (error) { btn.textContent = 'Error!'; btn.style.background='var(--red)'; }
+  else { btn.textContent = 'Saved ✓'; btn.style.background='var(--green)'; btn.style.color='#fff'; notes = notes.map(n => n.id === activeN ? {...n, title, body} : n); renderNoteList(); }
+  setTimeout(() => { btn.textContent = 'Save'; btn.style.background = ''; btn.style.color = ''; }, 2000);
+}
+
+async function delNote() {
+  if (activeN === null || !confirm('Delete this entry?')) return;
+  await sb.from('notes').delete().eq('id', activeN);
+  notes = notes.filter(n => n.id !== activeN);
+  activeN = null;
+  document.getElementById('noteEditor').style.display = 'none';
+  document.getElementById('noNoteSelected').style.display = 'block';
+  renderNoteList();
+}
+
+// UI
 function go(t){document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['timer','notebook','food','themes'][i]===t));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+t).classList.add('active');}
 function showModal(){document.getElementById('upgradeModal').classList.add('show');}
 function closeModal(){document.getElementById('upgradeModal').classList.remove('show');}
 function selPlan(p){document.getElementById('planMonth').classList.toggle('sel-plan',p==='month');document.getElementById('planYear').classList.toggle('sel-plan',p==='year');}
-function goPro(){isPro=true;closeModal();const tp=document.getElementById('tierPill');tp.textContent='Pro ✦';tp.style.background='linear-gradient(90deg,#7c3aed,#a855f7)';tp.style.color='#fff';tp.style.border='none';['adTimer','adNote','adFood','adTheme','timerProLock'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});document.getElementById('entryCount').textContent='Unlimited entries';document.querySelectorAll('.lock-banner').forEach(el=>el.style.display='none');document.querySelectorAll('.lock-over-badge').forEach(el=>el.style.display='none');document.querySelectorAll('.cust-locked').forEach(el=>el.classList.remove('cust-locked'));}
+function goPro(){isPro=true;closeModal();const tp=document.getElementById('tierPill');tp.textContent='Pro ✦';tp.style.background='linear-gradient(90deg,#7c3aed,#a855f7)';tp.style.color='#fff';tp.style.border='none';['adTimer','adNote','adFood','adTheme','timerProLock'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});document.querySelectorAll('.lock-banner').forEach(el=>el.style.display='none');document.querySelectorAll('.lock-over-badge').forEach(el=>el.style.display='none');document.querySelectorAll('.cust-locked').forEach(el=>el.classList.remove('cust-locked'));renderNoteList();}
 function setTheme(t){if(t==='volt'){document.documentElement.style.setProperty('--acc','#c8ff00');document.documentElement.style.setProperty('--acc-t','#0a0a00');document.getElementById('th-volt').textContent='Volt ✓';document.getElementById('th-night').textContent='Night';}else{document.documentElement.style.setProperty('--acc','#a78bfa');document.documentElement.style.setProperty('--acc-t','#0d0010');document.getElementById('th-night').textContent='Night ✓';document.getElementById('th-volt').textContent='Volt';}}
+
+// TIMER
 let run=false,iv=null,ph='work',set=1,left=40,wD=40,rD=20,sT=4,phTot=40;
 function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function rDots(){const c=document.getElementById('dots');c.innerHTML='';for(let i=0;i<sT;i++){const d=document.createElement('div');d.className='dot'+(i<set-1?' done':i===set-1?' cur':'');c.appendChild(d);}}
@@ -359,16 +533,13 @@ function rTimer(){document.getElementById('tBig').textContent=fmt(left);document
 function cfg(){wD=+document.getElementById('wS').value;rD=+document.getElementById('rS').value;sT=+document.getElementById('sS').value;document.getElementById('wV').textContent=wD+'s';document.getElementById('rV').textContent=rD+'s';document.getElementById('sV').textContent=sT;if(!run){left=wD;phTot=wD;ph='work';set=1;rTimer();}const tot=(wD+rD)*sT-rD,m=Math.floor(tot/60),s=tot%60;document.getElementById('totT').textContent=m+':'+(s<10?'0':'')+s;rDots();}
 function toggleT(){if(run){clearInterval(iv);run=false;document.getElementById('playBtn').textContent='RESUME';document.getElementById('tLbl').textContent='PAUSED';}else{run=true;document.getElementById('playBtn').textContent='PAUSE';document.getElementById('tLbl').textContent=ph==='work'?'WORKING':'RESTING';iv=setInterval(()=>{left--;if(left<0){if(ph==='work'){if(set>=sT){clearInterval(iv);run=false;document.getElementById('playBtn').textContent='START';document.getElementById('tLbl').textContent='DONE!';document.getElementById('tBig').textContent='00:00';return;}ph='rest';left=rD;phTot=rD;document.getElementById('tLbl').textContent='RESTING';}else{ph='work';set++;left=wD;phTot=wD;document.getElementById('tLbl').textContent='WORKING';}}rTimer();},1000);}}
 function resetT(){clearInterval(iv);run=false;ph='work';set=1;phTot=wD;left=wD;document.getElementById('playBtn').textContent='START';document.getElementById('tLbl').textContent='READY';rTimer();}
-const notes=[{t:'Chest & Triceps',b:'Bench Press: 4x8 @ 80kg ✓\nIncline DB: 3x10 @ 30kg ✓\nCable Flyes: 3x12\nTricep Pushdown: 4x15\n\nNotes: Up bench to 82.5kg next week.'},{t:'Back Day',b:'Deadlift: 5x5 @ 120kg — NEW PR!\nBarbell Row: 4x8 @ 70kg\n\nNotes: Rest day tomorrow.'},{t:'Leg Day',b:'Squat: 4x6 @ 100kg\nRomanian DL: 3x10 @ 80kg\n\nNotes: Increase squat to 105kg next.'}];
-let aN=0;
-function selN(i){aN=i;document.querySelectorAll('.note-card').forEach((el,idx)=>el.classList.toggle('sel',idx===i));document.getElementById('nT').value=notes[i].t;document.getElementById('nB').value=notes[i].b;}
-function newNote(){if(!isPro&&notes.length>=5){showModal();return;}notes.unshift({t:'New session',b:''});aN=0;selN(0);}
-function saveNote(){notes[aN].t=document.getElementById('nT').value;notes[aN].b=document.getElementById('nB').value;const b=document.getElementById('saveBtn');b.textContent='Saved ✓';b.style.background='#22c55e';b.style.color='#fff';setTimeout(()=>{b.textContent='Save';b.style.background='';b.style.color='';},2000);}
-function delNote(){notes.splice(aN,1);if(!notes.length)notes.push({t:'New session',b:''});selN(0);}
+
+// FOOD
 let scanned=false;
 function scan(){if(scanned&&!isPro){showModal();return;}document.getElementById('thinking').classList.add('show');setTimeout(()=>{document.getElementById('thinking').classList.remove('show');document.getElementById('result').classList.add('show');scanned=true;},2000);}
-function logMeal(){document.getElementById('loggedRow').style.display='flex';const b=document.getElementById('logBtn');b.textContent='Logged ✓';b.disabled=true;b.style.color='#22c55e';b.style.borderColor='#22c55e';}
-cfg();rTimer();
+function logMeal(){document.getElementById('loggedRow').style.display='flex';const b=document.getElementById('logBtn');b.textContent='Logged ✓';b.disabled=true;b.style.color='var(--green)';b.style.borderColor='var(--green)';}
+
+cfg(); rTimer(); init();
 </script>
 </body>
 </html>
